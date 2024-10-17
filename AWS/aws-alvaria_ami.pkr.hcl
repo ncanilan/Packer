@@ -17,11 +17,17 @@ source "amazon-ebs" "alvaria-alma9" {
 
   launch_block_device_mappings {
     device_name           = "/dev/sda1"
-    volume_size           = 30
+    volume_size           = 20
     volume_type           = "gp2"
     delete_on_termination = true
   }
 
+  launch_block_device_mappings {
+    device_name           = "/dev/sdb"
+    volume_size           = 25
+    volume_type           = "gp2"
+    delete_on_termination = true
+  }
 }
 build {
   name   = "alvaria-core-${upper(var.host_type)}"
@@ -30,6 +36,24 @@ build {
   provisioner "shell" {
     inline = [
       "sudo yum install -y cloud-utils-growpart lvm2",
+      "sudo lsblk",
+      "sudo vgs",
+      "DEVICE=$(lsblk | grep '25G  0 disk' | awk '{print $1}')",
+      "sudo pvcreate /dev/$DEVICE",
+      "sudo vgcreate alvaria /dev/$DEVICE",
+      "sudo lvcreate -L 5G -n opt alvaria",
+      "sudo lvcreate -L 5G -n var_opt alvaria",
+      "sudo lvcreate -L 5G -n var_lib_pgsql alvaria",
+      "sudo mkfs.xfs /dev/alvaria/opt",
+      "sudo mkfs.xfs /dev/alvaria/var_opt",
+      "sudo mkfs.xfs /dev/alvaria/var_lib_pgsql",
+      "sudo mkdir -p /var/lib/pgsql",
+      "sudo mount /dev/alvaria/opt /opt",
+      "sudo mount /dev/alvaria/var_opt /var/opt",
+      "sudo mount /dev/alvaria/var_lib_pgsql /var/lib/pgsql",
+      "echo '/dev/alvaria/opt /opt ext4 defaults 0 0' | sudo tee -a /etc/fstab",
+      "echo '/dev/alvaria/var_opt /var/opt ext4 defaults 0 0' | sudo tee -a /etc/fstab",
+      "echo '/dev/alvaria/var_lib_pgsql /var/lib/pgsql ext4 defaults 0 0' | sudo tee -a /etc/fstab",
       "sudo lsblk",
       "sudo vgs",
       "sudo yum install net-tools wget mlocate -y",
@@ -47,3 +71,4 @@ build {
   post-processor "vagrant" {}
   post-processor "compress" {}
 }
+
