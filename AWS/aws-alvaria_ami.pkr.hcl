@@ -51,9 +51,9 @@ build {
       "sudo mount /dev/alvaria/opt /opt",
       "sudo mount /dev/alvaria/var_opt /var/opt",
       "sudo mount /dev/alvaria/var_lib_pgsql /var/lib/pgsql",
-      "echo '/dev/alvaria/opt /opt ext4 defaults 0 0' | sudo tee -a /etc/fstab",
-      "echo '/dev/alvaria/var_opt /var/opt ext4 defaults 0 0' | sudo tee -a /etc/fstab",
-      "echo '/dev/alvaria/var_lib_pgsql /var/lib/pgsql ext4 defaults 0 0' | sudo tee -a /etc/fstab",
+      "echo '/dev/alvaria/opt /opt xfs defaults 0 0' | sudo tee -a /etc/fstab",
+      "echo '/dev/alvaria/var_opt /var/opt xfs defaults 0 0' | sudo tee -a /etc/fstab",
+      "echo '/dev/alvaria/var_lib_pgsql /var/lib/pgsql xfs defaults 0 0' | sudo tee -a /etc/fstab",
       "sudo lsblk",
       "sudo vgs",
       "sudo yum install net-tools wget mlocate -y",
@@ -71,4 +71,3 @@ build {
   post-processor "vagrant" {}
   post-processor "compress" {}
 }
-
